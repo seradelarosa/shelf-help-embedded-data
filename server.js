@@ -8,6 +8,15 @@ const morgan = require('morgan');
 const session = require('express-session');
 
 const authController = require('./controllers/auth.js');
+const foodsController = require('./controllers/foods.js');
+
+//middleware the restricts access to logged-in users only
+const isSignedIn = require('./middleware/is-signed-in.js');
+//middleware that makes the user object available to view templates via res.locals
+const passUserToView = require('./middleware/pass-user-to-view.js');
+
+
+//=== port stuff ============================================
 
 const port = process.env.PORT ? process.env.PORT : '3000';
 
@@ -16,6 +25,8 @@ mongoose.connect(process.env.MONGODB_URI);
 mongoose.connection.on('connected', () => {
   console.log(`Connected to MongoDB ${mongoose.connection.name}.`);
 });
+
+//=== middleware =======================================================
 
 app.use(express.urlencoded({ extended: false }));
 app.use(methodOverride('_method'));
@@ -28,11 +39,21 @@ app.use(
   })
 );
 
+//=== gets ===========================================================
+
+//first, check if there is a valid user OR require a user to be signed in to view a page
+app.use(passUserToView);
+
+//then go to home page
 app.get('/', (req, res) => {
   res.render('index.ejs', {
     user: req.session.user,
   });
 });
+
+// Users must be signed in to view any of the routes associated with their pantry
+app.use('/auth', authController);
+app.use(isSignedIn);
 
 app.get('/vip-lounge', (req, res) => {
   if (req.session.user) {
@@ -42,7 +63,9 @@ app.get('/vip-lounge', (req, res) => {
   }
 });
 
-app.use('/auth', authController);
+app.use('/users/:userId/foods', foodsController);
+
+//=== listen ========================================================== 
 
 app.listen(port, () => {
   console.log(`The express app is ready on port ${port}!`);
