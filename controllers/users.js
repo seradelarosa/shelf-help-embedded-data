@@ -14,5 +14,16 @@ router.get('/userlist', async (req, res) => {
     };
 });
 
+// Route to view a user's pantry in read-only
+router.get('/:userId/foods/read-only', async (req, res) => {
+    try {
+        const user = await User.findById(req.params.userId);
+        res.render('users/show.ejs', { user, foods: user.pantry });
+    } catch (error) {
+        console.log(error);
+        res.redirect('/');
+    }
+});
+
 
 module.exports = router;

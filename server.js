@@ -20,7 +20,9 @@ const passUserToView = require('./middleware/pass-user-to-view.js');
 //=== port stuff ============================================
 
 const port = process.env.PORT ? process.env.PORT : '3000';
+
 const path = require('path');
+app.set('views', path.join(__dirname, 'views'));
 
 mongoose.connect(process.env.MONGODB_URI);
 
@@ -40,6 +42,8 @@ app.use(
     saveUninitialized: true,
   })
 );
+
+
 
 //=== gets ===========================================================
 
