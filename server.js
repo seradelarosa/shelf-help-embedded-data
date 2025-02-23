@@ -9,6 +9,7 @@ const session = require('express-session');
 
 const authController = require('./controllers/auth.js');
 const foodsController = require('./controllers/foods.js');
+const usersController = require('./controllers/users.js');
 
 //middleware the restricts access to logged-in users only
 const isSignedIn = require('./middleware/is-signed-in.js');
@@ -41,6 +42,8 @@ app.use(
 );
 
 //=== gets ===========================================================
+
+app.use('/users', usersController);
 
 //first, check if there is a valid user OR require a user to be signed in to view a page
 app.use(passUserToView);
